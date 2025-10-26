@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImaCryptor - Conversor Imagen ↔ Texto Cifrado</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3a1;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 150px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button.secondary {
+            background-color: var(--accent-color);
+        }
+
+        button.secondary:hover {
+            background-color: #3da98a;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 300px;
+            border: 1px dashed #ccc;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: var(--card-color);
+            border-color: #ddd;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .data-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            background-color: #6c757d;
+            width: auto;
+            padding: 8px 15px;
+            margin-top: 5px;
+        }
+
+        .copy-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .instructions {
+            background-color: #e7f3ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .step {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background-color: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ImaCryptor</h1>
+            <p class="subtitle">Convierte imágenes a texto cifrado y viceversa. Comparte imágenes de forma segura como texto cifrado.</p>
+        </header>
+
+        <div class="instructions">
+            <h3>¿Cómo funciona?</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div>Carga una imagen y se convertirá automáticamente a texto Base64</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div>Ingresa una clave para cifrar el texto Base64</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div>Comparte el texto cifrado con alguien que tenga la misma clave</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div>La otra persona puede descifrar el texto con la clave y recuperar la imagen</div>
+            </div>
+        </div>
+
+        <div class="app-container">
+            <div class="card">
+                <h2>Imagen Original</h2>
+                
+                <div class="form-group">
+                    <label for="imageInput">Seleccionar imagen:</label>
+                    <input type="file" id="imageInput" accept="image/*">
+                </div>
+                
+                <div class="image-preview" id="imagePreview">
+                    <span>Vista previa de la imagen aparecerá aquí</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="keyPhrase">Clave de Cifrado:</label>
+                    <input type="text" id="keyPhrase" placeholder="Ingresa tu clave secreta">
+                    <div class="data-info">
+                        <strong>Importante:</strong> La misma clave se necesita para cifrar y descifrar. Compártela de forma segura.
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="encryptBtn">Convertir a Texto Cifrado</button>
+                    <button id="decryptBtn" class="secondary">Convertir Texto a Imagen</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Resultado - Texto Cifrado</h2>
+                
+                <div class="form-group">
+                    <label for="encryptedText">Texto Cifrado:</label>
+                    <textarea id="encryptedText" placeholder="El texto cifrado aparecerá aquí..."></textarea>
+                    <button id="copyTextBtn" class="copy-btn">Copiar Texto</button>
+                </div>
+                
+                <div class="image-preview" id="resultPreview">
+                    <span>La imagen recuperada aparecerá aquí</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="actionInfo">Información del Proceso:</label>
+                    <textarea id="actionInfo" rows="3" readonly placeholder="Detalles de la conversión..."></textarea>
+                </div>
+                
+                <button id="downloadBtn" class="secondary">Descargar Imagen Recuperada</button>
+                
+                <div id="statusMessage" class="status hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const resultPreview = document.getElementById('resultPreview');
+            const keyPhrase = document.getElementById('keyPhrase');
+            const encryptedText = document.getElementById('encryptedText');
+            const encryptBtn = document.getElementById('encryptBtn');
+            const decryptBtn = document.getElementById('decryptBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const copyTextBtn = document.getElementById('copyTextBtn');
+            const actionInfo = document.getElementById('actionInfo');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            let originalImage = null;
+            let processedImage = null;
+            let base64String = '';
+            
+            // Cargar imagen
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.match('image.*')) {
+                    showStatus('Por favor, selecciona un archivo de imagen válido.', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalImage = new Image();
+                    originalImage.onload = function() {
+                        imagePreview.innerHTML = '';
+                        imagePreview.appendChild(originalImage);
+                        
+                        // Convertir a Base64 automáticamente
+                        base64String = e.target.result;
+                        actionInfo.value = `Imagen cargada: ${file.name}\nTamaño: ${originalImage.width}x${originalImage.height}\nTipo: ${file.type}`;
+                    };
+                    originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                showStatus('Imagen cargada correctamente. Ahora puedes cifrarla.', 'success');
+            });
+            
+            // Convertir imagen a texto cifrado
+            encryptBtn.addEventListener('click', function() {
+                if (!originalImage) {
+                    showStatus('Primero carga una imagen.', 'error');
+                    return;
+                }
+                
+                if (!keyPhrase.value) {
+                    showStatus('Ingresa una clave para cifrar.', 'error');
+                    return;
+                }
+                
+                try {
+                    // Cifrar el texto Base64
+                    const encryptedBase64 = encryptString(base64String, keyPhrase.value);
+                    encryptedText.value = encryptedBase64;
+                    
+                    // Limpiar vista previa de resultado
+                    resultPreview.innerHTML = '<span>Imagen convertida a texto cifrado</span>';
+                    processedImage = null;
+                    
+                    actionInfo.value = `Imagen convertida a texto cifrado.\nLongitud del texto: ${encryptedBase64.length} caracteres\nClave utilizada: ${keyPhrase.value}`;
+                    
+                    showStatus('Imagen convertida a texto cifrado correctamente. ¡Copia el texto para compartirlo!', 'success');
+                } catch (error) {
+                    showStatus('Error al cifrar la imagen: ' + error.message, 'error');
+                }
+            });
+            
+            // Convertir texto cifrado a imagen
+            decryptBtn.addEventListener('click', function() {
+                if (!encryptedText.value) {
+                    showStatus('No hay texto cifrado para descifrar.', 'error');
+                    return;
+                }
+                
+                if (!keyPhrase.value) {
+                    showStatus('Ingresa la clave para descifrar.', 'error');
+                    return;
+                }
+                
+                try {
+                    // Descifrar el texto
+                    const decryptedBase64 = decryptString(encryptedText.value, keyPhrase.value);
+                    
+                    // Verificar que es un Base64 válido de imagen
+                    if (!decryptedBase64.startsWith('data:image/')) {
+                        throw new Error('El texto descifrado no es una imagen válida. Verifica la clave.');
+                    }
+                    
+                    // Crear imagen desde Base64
+                    processedImage = new Image();
+                    processedImage.onload = function() {
+                        resultPreview.innerHTML = '';
+                        resultPreview.appendChild(processedImage);
+                        
+                        actionInfo.value = `Texto convertido a imagen correctamente.\nTamaño: ${processedImage.width}x${processedImage.height}`;
+                        
+                        showStatus('Texto convertido a imagen correctamente.', 'success');
+                    };
+                    processedImage.onerror = function() {
+                        throw new Error('No se pudo crear la imagen desde el texto descifrado.');
+                    };
+                    processedImage.src = decryptedBase64;
+                    
+                } catch (error) {
+                    showStatus('Error al descifrar el texto: ' + error.message, 'error');
+                }
+            });
+            
+            // Descargar imagen recuperada
+            downloadBtn.addEventListener('click', function() {
+                if (!processedImage) {
+                    showStatus('No hay imagen recuperada para descargar.', 'error');
+                    return;
+                }
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = processedImage.width;
+                canvas.height = processedImage.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(processedImage, 0, 0);
+                
+                const link = document.createElement('a');
+                link.download = 'imagen-recuperada.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                showStatus('Imagen descargada correctamente.', 'success');
+            });
+            
+            // Copiar texto cifrado al portapapeles
+            copyTextBtn.addEventListener('click', function() {
+                if (!encryptedText.value) {
+                    showStatus('No hay texto para copiar.', 'error');
+                    return;
+                }
+                
+                encryptedText.select();
+                document.execCommand('copy');
+                
+                // Deseleccionar el texto
+                window.getSelection().removeAllRanges();
+                
+                showStatus('Texto copiado al portapapeles.', 'success');
+            });
+            
+            // Funciones de utilidad
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status ' + type;
+                statusMessage.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    statusMessage.classList.add('hidden');
+                }, 5000);
+            }
+            
+            // Algoritmos de cifrado de texto
+            function encryptString(text, key) {
+                let result = '';
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i);
+                    const keyChar = key.charCodeAt(i % key.length);
+                    const encryptedChar = charCode ^ keyChar;
+                    result += String.fromCharCode(encryptedChar);
+                }
+                return btoa(result); // Convertir a Base64 para hacerlo "transmisible"
+            }
+            
+            function decryptString(encryptedText, key) {
+                try {
+                    // Decodificar desde Base64
+                    const decodedText = atob(encryptedText);
+                    let result = '';
+                    
+                    for (let i = 0; i < decodedText.length; i++) {
+                        const charCode = decodedText.charCodeAt(i);
+                        const keyChar = key.charCodeAt(i % key.length);
+                        const decryptedChar = charCode ^ keyChar;
+                        result += String.fromCharCode(decryptedChar);
+                    }
+                    
+                    return result;
+                } catch (error) {
+                    throw new Error('Texto cifrado inválido. No es Base64 válido.');
+                }
+            }
+            
+            // Ejemplo de uso automático para demostración
+            setTimeout(() => {
+                actionInfo.value = "¡Bienvenido! Carga una imagen y usa una clave para convertirla en texto cifrado.";
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
